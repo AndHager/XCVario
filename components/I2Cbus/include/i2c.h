@@ -301,7 +301,7 @@ esp_err_t i2c_master_write_read_device(i2c_port_t i2c_num, uint8_t device_addres
  * @return Handle to the I2C command link or NULL if the buffer provided is too small, please
  *         use `I2C_LINK_RECOMMENDED_SIZE` macro to get the recommended size for the buffer.
  */
-i2c_cmd_handle_t i2c_cmd_link_create_static(uint8_t* buffer, uint32_t size);
+i2c_cmd_handle_t i2c_cmd_link_create_static(i2c_port_t i2c_num, uint8_t* buffer, uint32_t size);
 
 /**
  * @brief Create and initialize an I2C commands list with a given buffer.
