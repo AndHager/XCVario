@@ -21,17 +21,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE SOFTWARE.
  ========================================================================= */
 
-#include "I2Cbus.hpp"
 #include <stdio.h>
 #include <stdint.h>
 #include "sdkconfig.h"
 #include "esp_err.h"
 #include "esp_log.h"
 // #include "driver/i2c.h"
-#include "i2c.h"
 #include "driver/gpio.h"
 #include <iostream>
 #include <cstring>
+#include "I2Cbus.hpp"
 
 
 // #define CONFIG_I2CBUS_LOG_RW_LEVEL_INFO
