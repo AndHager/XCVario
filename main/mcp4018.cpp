@@ -1,5 +1,4 @@
 #include "mcp4018.h"
-#include "I2C.h"
 #include <logdef.h>
 
 //Create instance  MCP4018(gpio_num_t sda, gpio_num_t scl);

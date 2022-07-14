@@ -3,7 +3,6 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include "I2C.h"
 #include <string.h>
 #include <logdef.h>
 #include "Setup.h"

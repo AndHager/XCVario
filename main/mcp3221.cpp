@@ -1,5 +1,4 @@
 #include "mcp3221.h"
-#include "I2C.h"
 #include <logdef.h>
 
 //Create instance  MCP3221(gpio_num_t sda, gpio_num_t scl);

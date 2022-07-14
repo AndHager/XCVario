@@ -1,5 +1,4 @@
 #include "cat5171.h"
-#include "I2C.h"
 #include <logdef.h>
 
 //Create instance  CAT5171(gpio_num_t sda, gpio_num_t scl);

@@ -1,7 +1,6 @@
 #ifndef MCP4018_H
 #define MCP4018_H
 
-#include "I2C.h"
 #include "esp_system.h"
 #include "I2Cbus.hpp"
 #include "Poti.h"
