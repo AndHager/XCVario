@@ -213,20 +213,34 @@ double SPL06_007::get_scale_factor( int reg )
 
 // #define RANDOM_TEST
 
+
+static int32_t last_praw=0;
+
 int32_t SPL06_007::get_praw( bool &ok )
 {
 	_praw = 0;
 	uint8_t data[3];
-	if( !i2c_read_bytes( 0X00, 3, data ) )
-		ok = false;
+	if( !i2c_read_bytes( 0X00, 3, data ) ){
+           ESP_LOGW(FNAME,"P raw read error, data: %02x%02x%02x", data[0],data[1],data[2] );
+	   ok = false;
+	   return last_praw;
+	}
 #ifdef RANDOM_TEST
 	data[2] = esp_random() % 255;
 	data[1] = esp_random() % 255;
 #endif
 	_praw = (data[0] << 8) | data[1];
 	_praw = (_praw << 8) | data[2];
-	if(_praw & (1 << 23))
-		_praw = _praw | 0XFF000000; // Set left bits to one for 2's complement conversion of negitive number
+	if(_praw & (1 << 23)){
+	   _praw = _praw | 0XFF000000; // Set left bits to one for 2's complement conversion of negitive number
+	}
+	if( address == 0x76 ){
+  	   if( abs( _praw - last_praw )  > 400 ){
+               ESP_LOGW(FNAME,"P raw delta OOB: %d %06x last: %d %06x, delta %d", _praw, _praw, last_praw, last_praw, abs( _praw - last_praw ) );
+	   }
+           last_praw = _praw;
+	}
+
 	ok = true;
 	return _praw;
 }

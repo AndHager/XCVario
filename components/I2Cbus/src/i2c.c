@@ -1047,7 +1047,6 @@ i2c_cmd_handle_t i2c_cmd_link_create_static( i2c_port_t i2c_num, uint8_t* buffer
     if (buffer == NULL || size <= sizeof(i2c_cmd_desc_t)) {
         return NULL;
     }
-    I2C_ENTER_CRITICAL(&(i2c_context[i2c_num].spinlock));
 
 
     i2c_cmd_desc_t *cmd_desc = (i2c_cmd_desc_t *) buffer;
@@ -1057,7 +1056,6 @@ i2c_cmd_handle_t i2c_cmd_link_create_static( i2c_port_t i2c_num, uint8_t* buffer
     cmd_desc->free_buffer = cmd_desc + 1;
     cmd_desc->free_size = size - sizeof(i2c_cmd_desc_t);
 
-    I2C_EXIT_CRITICAL(&(i2c_context[i2c_num].spinlock));
     return (i2c_cmd_handle_t) cmd_desc;
 }
 
@@ -1091,8 +1089,6 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
     if (cmd == NULL || i2c_cmd_link_is_static(cmd)) {
         return;
     }
-    I2C_ENTER_CRITICAL(&(i2c_context[0].spinlock));
-    I2C_ENTER_CRITICAL(&(i2c_context[1].spinlock));  //tbd, elaborate I2C num used
     while (cmd->free) {
         i2c_cmd_link_t *ptmp = cmd->free;
         cmd->free = cmd->free->next;
@@ -1102,8 +1098,6 @@ void i2c_cmd_link_delete(i2c_cmd_handle_t cmd_handle)
     cmd->free = NULL;
     cmd->head = NULL;
     free(cmd_handle);
-    I2C_EXIT_CRITICAL(&(i2c_context[0].spinlock));
-    I2C_EXIT_CRITICAL(&(i2c_context[1].spinlock));
     return;
 }
 
