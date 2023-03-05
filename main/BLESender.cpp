@@ -39,6 +39,8 @@ static DataLink *dlb;
 #define CHARACTERISTIC_UUID_RX "0000ffe1-0000-1000-8000-00805f9b34fb"
 #define CHARACTERISTIC_UUID_TX "0000ffe1-0000-1000-8000-00805f9b34fb"
 
+#define CHARACTERISTIC_SENSOR_SERVICE "aba27100-143b-4b81-a444-edcd0000f020" // UUID for notification service Flytec
+
 
 class MyServerCallbacks: public BLEServerCallbacks {
 	void onConnect(BLEServer* pServer) {
@@ -76,9 +78,9 @@ int BLESender::queueFull() {
 }
 
 void BLESender::btTask(void *pvParameters){
+	BLEDevice::setMTU(20);
+	int mtu = 20; // BLEDevice::getMTU();
 	while(1) {
-		BLEDevice::setMTU(100);
-		int mtu = BLEDevice::getMTU();
 		progress(mtu);
 		Router::routeBT();
 		if( uxTaskGetStackHighWaterMark( pid ) < 256 )
@@ -131,26 +133,27 @@ void BLESender::begin(){
 
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();
-
 	pServer->setCallbacks(new MyServerCallbacks());
 
-	// Create the BLE Service
+	// Create the BLE ServiceSENSBOX_SERVICE_UUID
 	BLEService *pService = pServer->createService(SERVICE_UUID);
 
 	// Create a BLE Characteristic
 	pTxCharacteristic = pService->createCharacteristic(
-			CHARACTERISTIC_UUID_TX,
-			BLECharacteristic::PROPERTY_NOTIFY
+			CHARACTERISTIC_SENSOR_SERVICE,
+			BLECharacteristic::PROPERTY_NOTIFY |
+			BLECharacteristic::PROPERTY_WRITE_NR |
+			BLECharacteristic::PROPERTY_READ
 	);
 
 	pTxCharacteristic->addDescriptor(new BLE2902());
-
+ /*
 	BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
 			CHARACTERISTIC_UUID_RX,
 			BLECharacteristic::PROPERTY_WRITE
 	);
-
-	pRxCharacteristic->setCallbacks(new MyCallbacks());
+*/
+	pTxCharacteristic->setCallbacks(new MyCallbacks());
 
 	// Start the service
 	pService->start();
