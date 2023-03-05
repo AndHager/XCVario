@@ -17,7 +17,7 @@ public:
   void begin();
   static int queueFull();
   static void btTask(void *pvParameters);
-  static void progress();  // progress loop
+  static void progress(int mtu);  // progress loop
   bool selfTest();         // call 3 seconds after begin
 
 private:

@@ -35,9 +35,9 @@ static DataLink *dlb;
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
 
-#define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
-#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+#define SERVICE_UUID           "0000ffe0-0000-1000-8000-00805f9b34fb" // UART service UUID
+#define CHARACTERISTIC_UUID_RX "0000ffe1-0000-1000-8000-00805f9b34fb"
+#define CHARACTERISTIC_UUID_TX "0000ffe1-0000-1000-8000-00805f9b34fb"
 
 
 class MyServerCallbacks: public BLEServerCallbacks {
@@ -77,7 +77,9 @@ int BLESender::queueFull() {
 
 void BLESender::btTask(void *pvParameters){
 	while(1) {
-		progress();
+		BLEDevice::setMTU(100);
+		int mtu = BLEDevice::getMTU();
+		progress(mtu);
 		Router::routeBT();
 		if( uxTaskGetStackHighWaterMark( pid ) < 256 )
 			ESP_LOGW(FNAME,"Warning BT task stack low: %d bytes", uxTaskGetStackHighWaterMark( pid ) );
@@ -85,15 +87,15 @@ void BLESender::btTask(void *pvParameters){
 	}
 }
 
-void BLESender::progress(){
+void BLESender::progress(int mtu){
 	char buf[256];
 	if (deviceConnected) {
-		int len = Router::pullBlock( bt_tx_q, buf, 20 );
-		ESP_LOGI(FNAME,"BLE device connected, data len=%d",len);
+		int len = Router::pullBlock( bt_tx_q, buf, mtu );
+		ESP_LOGI(FNAME,"BLE device connected, data len=%d mtu:%d",len, mtu);
 		if( len ){
 			int pos=0;
 			while( len > 0 ){
-				int sent=min( len, 20 );
+				int sent=min( len, mtu );
 				pTxCharacteristic->setValue((uint8_t*)&buf[pos], (size_t)sent);
 				pTxCharacteristic->notify();
 				ESP_LOGI(FNAME,"<BT LE TX %d bytes", sent );
@@ -120,6 +122,7 @@ void BLESender::progress(){
 void BLESender::begin(){
 	ESP_LOGI(FNAME,"BLESender::begin()" );
 	ESP_LOGI(FNAME,"BT LE on, create BT master object" );
+	esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
 	dlb = new DataLink();
 	// Create the BLE Device
 	std::string ble_id( SetupCommon::getID() );
@@ -128,6 +131,7 @@ void BLESender::begin(){
 
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();
+
 	pServer->setCallbacks(new MyServerCallbacks());
 
 	// Create the BLE Service
